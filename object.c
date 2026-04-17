@@ -222,7 +222,12 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     fclose(f);
 
     // 1. Verify hash
-   
+    ObjectID computed;
+    compute_hash(buffer, size, &computed);
+    if (memcmp(&computed, id, sizeof(ObjectID)) != 0) {
+        free(buffer);
+        return -1;
+    }
 
     memcpy(out, data_start, data_len);
 
