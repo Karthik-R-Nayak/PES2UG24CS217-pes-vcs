@@ -23,6 +23,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "index.h"
+#include <sys/stat.h>
+#include <unistd.h>
+
+// Forward declaration
+int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out);
 
 // ─── PROVIDED ────────────────────────────────────────────────────────────────
 
