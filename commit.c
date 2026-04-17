@@ -195,8 +195,7 @@ int head_update(const ObjectID *new_commit) {
 // Returns 0 on success, -1 on error.
 int commit_create(const char *message, ObjectID *commit_id_out) {
     // TODO: Implement commit creation
-    // (See Lab Appendix for logical steps)
-    int commit_create(const char *message, ObjectID *commit_id_out) {
+    // (See Lab Appendix for logical steps
     // 1. Build tree from index
     ObjectID tree_id;
     if (tree_from_index(&tree_id) != 0) return -1;
