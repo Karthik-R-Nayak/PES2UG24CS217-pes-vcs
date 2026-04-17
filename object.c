@@ -197,6 +197,39 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
 // Returns 0 on success, -1 on error (file not found, corrupt, etc.).
 int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_t *len_out) {
     // TODO: Implement
-    (void)id; (void)type_out; (void)data_out; (void)len_out;
-    return -1;
+    char path[512];
+    object_path(id, path, sizeof(path));
+
+    FILE *f = fopen(path, "rb");
+    if (!f) return -1;
+
+    // Read entire file
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f);
+    rewind(f);
+
+    char *buffer = malloc(size);
+    if (!buffer) {
+        fclose(f);
+        return -1;
+    }
+
+    if (fread(buffer, 1, size, f) != size) {
+        fclose(f);
+        free(buffer);
+        return -1;
+    }
+    fclose(f);
+
+    // 1. Verify hash
+   
+
+    memcpy(out, data_start, data_len);
+
+    *data_out = out;
+    *len_out = data_len;
+
+    free(buffer);
+    return 0;
+}
 }
