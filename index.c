@@ -23,7 +23,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
-#include "index.h"
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -244,6 +243,8 @@ int index_add(Index *index, const char *path) {
     // TODO: Implement file staging
     // (See Lab Appendix for logical steps
     // 1. Read file
+   int index_add(Index *index, const char *path) {
+    // 1. Read file
     FILE *f = fopen(path, "rb");
     if (!f) return -1;
 
@@ -251,16 +252,14 @@ int index_add(Index *index, const char *path) {
     size_t size = ftell(f);
     rewind(f);
 
-    void *data = malloc(size);
-    if (!data) {
-        fclose(f);
-        return -1;
-    }
-
-    if (fread(data, 1, size, f) != size) {
-        fclose(f);
-        free(data);
-        return -1;
+    char *data = NULL;
+    if (size > 0) {
+        data = malloc(size);
+        if (!data) {
+            fclose(f);
+            return -1;
+        }
+        fread(data, 1, size, f);
     }
     fclose(f);
 
@@ -272,19 +271,20 @@ int index_add(Index *index, const char *path) {
     }
     free(data);
 
-    // 3. Get metadata
+    // 3. Get file info
     struct stat st;
     if (stat(path, &st) != 0) return -1;
 
-    // 4. Check if already exists
-    IndexEntry *e = index_find(index, path);
+    // 4. Add new entry (no overwrite logic for now)
+    if (index->count >= MAX_INDEX_ENTRIES) return -1;
 
-    if (!e) {
-        if (index->count >= MAX_INDEX_ENTRIES) return -1;
-        e = &index->entries[index->count++];
-    }
+    IndexEntry *e = &index->entries[index->count++];
 
-    e->mode = st.st_mode;
+    if (st.st_mode & S_IXUSR)
+        e->mode = 0100755;
+    else
+        e->mode = 0100644;
+
     e->hash = id;
     e->mtime_sec = st.st_mtime;
     e->size = st.st_size;
@@ -292,5 +292,5 @@ int index_add(Index *index, const char *path) {
 
     // 5. Save index
     return index_save(index);
-}
+   }
 
