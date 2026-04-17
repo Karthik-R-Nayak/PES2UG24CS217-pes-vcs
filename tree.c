@@ -15,7 +15,14 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include "tree.h"
+#include "index.h"   
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
+// Forward declaration
+int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out);
 // ─── Mode Constants ─────────────────────────────────────────────────────────
 
 #define MODE_FILE      0100644
