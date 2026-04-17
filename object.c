@@ -242,6 +242,23 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
         free(buffer);
         return -1;
     }
+    if (strcmp(type_str, "blob") == 0) *type_out = OBJ_BLOB;
+    else if (strcmp(type_str, "tree") == 0) *type_out = OBJ_TREE;
+    else if (strcmp(type_str, "commit") == 0) *type_out = OBJ_COMMIT;
+    else {
+        free(buffer);
+        return -1;
+    }
+
+    // 4. Extract data
+    char *data_start = null_pos + 1;
+    size_t data_len = size - (header_len + 1);
+
+    void *out = malloc(data_len);
+    if (!out) {
+        free(buffer);
+        return -1;
+    }
     memcpy(out, data_start, data_len);
 
     *data_out = out;
