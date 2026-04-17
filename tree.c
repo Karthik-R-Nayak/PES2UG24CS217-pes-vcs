@@ -156,6 +156,22 @@ int tree_from_index(ObjectID *id_out) {
             size_t len = slash - e->path;
             strncpy(dirname, e->path, len);
             dirname[len] = '\0';
+             // Check if already added
+            int found = 0;
+            for (int j = 0; j < tree.count; j++) {
+                if (strcmp(tree.entries[j].name, dirname) == 0) {
+                    found = 1;
+                    break;
+                }
+            }
+             if (!found) {
+                TreeEntry *te = &tree.entries[tree.count++];
+                te->mode = 0040000; // directory
+                memset(&te->hash, 0, sizeof(ObjectID)); // placeholder
+                snprintf(te->name, sizeof(te->name), "%s", dirname);
+            }
+        }
+    }
 
     (void)id_out;
     return -1;
