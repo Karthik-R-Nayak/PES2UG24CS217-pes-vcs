@@ -243,7 +243,7 @@ int index_add(Index *index, const char *path) {
     // TODO: Implement file staging
     // (See Lab Appendix for logical steps
     // 1. Read file
-   int index_add(Index *index, const char *path) {
+ 
     // 1. Read file
     FILE *f = fopen(path, "rb");
     if (!f) return -1;
