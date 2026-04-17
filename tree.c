@@ -143,6 +143,20 @@ int tree_from_index(ObjectID *id_out) {
 
         // Check if path has subdirectory
         char *slash = strchr(e->path, '/');
+         if (!slash) {
+            // ---- FILE in root ----
+            TreeEntry *te = &tree.entries[tree.count++];
+
+            te->mode = e->mode;
+            te->hash = e->hash;
+            snprintf(te->name, sizeof(te->name), "%s", e->path);
+        } else {
+            // ---- DIRECTORY ----
+            char dirname[256];
+            size_t len = slash - e->path;
+            strncpy(dirname, e->path, len);
+            dirname[len] = '\0';
+
     (void)id_out;
     return -1;
 }
