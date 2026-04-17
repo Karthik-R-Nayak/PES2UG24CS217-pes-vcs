@@ -139,8 +139,13 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 int tree_from_index(ObjectID *id_out) {
     // TODO: Implement recursive tree building
     // (See Lab Appendix for logical steps)
-     Index index;
+    Index index;
+
+    // Load index
     if (index_load(&index) != 0) return -1;
+
+    // If nothing staged → fail
+    if (index.count == 0) return -1;
 
     Tree tree;
     tree.count = 0;
@@ -148,38 +153,21 @@ int tree_from_index(ObjectID *id_out) {
     for (int i = 0; i < index.count; i++) {
         IndexEntry *e = &index.entries[i];
 
-        // Check if path has subdirectory
-        char *slash = strchr(e->path, '/');
-         if (!slash) {
-            // ---- FILE in root ----
-            TreeEntry *te = &tree.entries[tree.count++];
+        TreeEntry *te = &tree.entries[tree.count++];
 
-            te->mode = e->mode;
-            te->hash = e->hash;
-            snprintf(te->name, sizeof(te->name), "%s", e->path);
-        } else {
-            // ---- DIRECTORY ----
-            char dirname[256];
-            size_t len = slash - e->path;
-            strncpy(dirname, e->path, len);
-            dirname[len] = '\0';
-             // Check if already added
-            int found = 0;
-            for (int j = 0; j < tree.count; j++) {
-                if (strcmp(tree.entries[j].name, dirname) == 0) {
-                    found = 1;
-                    break;
-                }
-            }
-             if (!found) {
-                TreeEntry *te = &tree.entries[tree.count++];
-                te->mode = 0040000; // directory
-                memset(&te->hash, 0, sizeof(ObjectID)); // placeholder
-                snprintf(te->name, sizeof(te->name), "%s", dirname);
-            }
-        }
+        te->mode = e->mode;
+        te->hash = e->hash;
+
+        // Extract filename only
+        const char *name = strrchr(e->path, '/');
+        if (name) name++;
+        else name = e->path;
+
+        snprintf(te->name, sizeof(te->name), "%s", name);
     }
-void *data;
+
+    // Serialize tree
+    void *data;
     size_t len;
     if (tree_serialize(&tree, &data, &len) != 0) return -1;
 
@@ -192,4 +180,3 @@ void *data;
     free(data);
     return 0;
 }
- 
