@@ -228,7 +228,20 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
         free(buffer);
         return -1;
     }
+     char *null_pos = memchr(buffer, '\0', size);
+    if (!null_pos) {
+        free(buffer);
+        return -1;
+    }
 
+    size_t header_len = null_pos - buffer;
+
+    char type_str[16];
+    size_t obj_size;
+    if (sscanf(buffer, "%15s %zu", type_str, &obj_size) != 2) {
+        free(buffer);
+        return -1;
+    }
     memcpy(out, data_start, data_len);
 
     *data_out = out;
